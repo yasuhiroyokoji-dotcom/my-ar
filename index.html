@@ -6,10 +6,9 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <canvas id="emojiCanvas" width="256" height="256" style="display:none;"></canvas>
+    <canvas id="arCanvas" width="512" height="256" style="display:none;"></canvas>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; smooth: true; smoothCount: 15;">
-      
       <a-marker preset="hiro">
         <a-entity position="0 0.4 0" rotation="0 45 0" animation="property: position; to: 0 0.5 0; dir: alternate; loop: true; dur: 1200">
           <a-box position="0 0 0" scale="0.4 0.4 0.8" color="#8B4513"></a-box>
@@ -21,36 +20,46 @@
           <a-box position="-0.15 -0.4 -0.25" scale="0.08 0.6 0.08" color="#333"></a-box>
         </a-entity>
         
-        <a-text id="result-text" value="おみくじを引く" position="0 1.5 0" align="center" color="#FFD700" scale="1.2 1.2 1.2"
-                font="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/notosansjp/NotoSansJP-Medium.json"
-                shader="msdf"></a-text>
-
-        <a-plane id="emoji-plane" position="0 1.9 0" rotation="-90 0 0" scale="0.5 0.5 0.5"
-                 material="src: #emojiCanvas; transparent: true; opacity: 1;"></a-plane>
+        <a-plane id="result-plane" position="0 1.6 0" rotation="-90 0 0" width="2" height="1"
+                 material="src: #arCanvas; transparent: true; opacity: 1;"></a-plane>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // 絵文字を描く関数
-      function drawEmoji(emoji) {
-        const canvas = document.getElementById('emojiCanvas');
+      // 文字と絵文字を1枚の画像として描く関数
+      function updateARDisplay(text, emoji) {
+        const canvas = document.getElementById('arCanvas');
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = "200px serif";
+
+        // 背景（少し透ける黒にすると文字が見やすくなります。不要なら消せます）
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+        ctx.roundRect(10, 10, 492, 236, 20);
+        ctx.fill();
+
+        // 文字の設定（スマホの標準フォントを使用）
+        ctx.fillStyle = "#FFD700"; // 金色
+        ctx.font = "bold 80px sans-serif";
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
+        ctx.fillText(text, canvas.width / 2, 120);
+
+        // 絵文字の設定
+        ctx.font = "90px serif";
+        ctx.fillText(emoji, canvas.width / 2, 210);
         
-        const plane = document.querySelector('#emoji-plane');
+        // AR側に「描き直したよ」と通知
+        const plane = document.querySelector('#result-plane');
         if(plane.getObject3D('mesh')) {
           plane.getObject3D('mesh').material.map.needsUpdate = true;
         }
       }
 
-      // 初期の馬絵文字
-      window.onload = () => { drawEmoji("🐎"); };
+      // 最初はこれを出しておく
+      window.onload = () => { 
+        setTimeout(() => { updateARDisplay("タップしておみくじ", "🐎"); }, 1000);
+      };
 
       // タップイベント
       window.addEventListener('touchstart', function () {
@@ -58,13 +67,10 @@
           {txt: "大吉", emo: "🌅"},
           {txt: "中吉", emo: "🎍"},
           {txt: "小吉", emo: "🥕"},
-          {txt: "吉", emo: "✨"},
           {txt: "あけおめ", emo: "🧧"}
         ];
         const res = results[Math.floor(Math.random() * results.length)];
-        
-        document.querySelector('#result-text').setAttribute('value', res.txt);
-        drawEmoji(res.emo);
+        updateARDisplay(res.txt, res.emo);
       });
     </script>
   </body>
