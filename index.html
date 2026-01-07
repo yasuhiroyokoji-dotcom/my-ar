@@ -2,42 +2,49 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <script>
-      window.addEventListener('error', function(e) {
-        alert("エラーが発生しました: " + e.message);
-      });
-    </script>
-
-    <a-scene embedded arjs="debugUIEnabled: false;">
+    <a-scene embedded arjs="debugUIEnabled: false;" cursor="rayOrigin: mouse" raycaster="objects: .clickable">
+      
       <a-assets>
-        <a-asset-item id="horse" src="https://raw.githubusercontent.com/nmarulo/ar-assets/main/horse.glb"></a-asset-item>
+        <a-asset-item id="test-model" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
       </a-assets>
 
       <a-marker preset="hiro">
-        <a-sphere position="0 0 0" radius="0.2" color="blue"></a-sphere>
-        
-        <a-entity gltf-model="#horse" 
-                  scale="0.02 0.02 0.02" 
+        <a-entity gltf-model="#test-model" 
+                  scale="0.5 0.5 0.5" 
                   position="0 0 0" 
-                  animation-mixer>
+                  class="clickable">
         </a-entity>
         
-        <a-text id="omikuji-text" value="TAP TO START" position="0 1 1" align="center" color="#FFD700"></a-text>
+        <a-text id="omikuji-text" 
+                value="TAP THE DUCK!" 
+                position="0 1 0" 
+                align="center" 
+                color="#FFD700" 
+                scale="1.5 1.5 1.5">
+        </a-text>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      document.body.addEventListener('click', function () {
-        const results = ["大吉 🐎", "中吉 🥕", "小吉 ☁️", "吉 ✨"];
+      // 画面全体をどこでもタップした時に動くように修正
+      window.addEventListener('touchstart', function () {
+        const results = ["DAIKICHI 🐎", "CHUKICHI 🥕", "SHOKICHI ☁️", "KICHI ✨"];
         const randomResult = results[Math.floor(Math.random() * results.length)];
-        document.querySelector('#omikuji-text').setAttribute('value', randomResult);
+        
+        const textElement = document.querySelector('#omikuji-text');
+        if (textElement) {
+          textElement.setAttribute('value', randomResult);
+          // 音を出す代わりの確認用
+          console.log("Result: " + randomResult);
+        }
       });
     </script>
   </body>
