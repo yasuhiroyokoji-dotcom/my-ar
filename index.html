@@ -6,11 +6,11 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <canvas id="arCanvas" width="512" height="256" style="display:none;"></canvas>
+    <canvas id="textCanvas" width="512" height="128" style="display:none;"></canvas>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; smooth: true; smoothCount: 15;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
-        <a-entity position="0 0.4 0" rotation="0 45 0" animation="property: position; to: 0 0.5 0; dir: alternate; loop: true; dur: 1200">
+        <a-entity position="0 0.4 0" rotation="0 45 0">
           <a-box position="0 0 0" scale="0.4 0.4 0.8" color="#8B4513"></a-box>
           <a-box position="0 0.4 0.35" rotation="-20 0 0" scale="0.15 0.5 0.2" color="#8B4513"></a-box>
           <a-box position="0 0.6 0.5" scale="0.2 0.2 0.35" color="#8B4513"></a-box>
@@ -20,57 +20,46 @@
           <a-box position="-0.15 -0.4 -0.25" scale="0.08 0.6 0.08" color="#333"></a-box>
         </a-entity>
         
-        <a-plane id="result-plane" position="0 1.6 0" rotation="-90 0 0" width="2" height="1"
-                 material="src: #arCanvas; transparent: true; opacity: 1;"></a-plane>
+        <a-plane id="msg-board" position="0 1.5 0" rotation="-90 0 0" width="2" height="0.5"
+                 material="src: #textCanvas; transparent: true;"></a-plane>
       </a-marker>
-
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // 文字と絵文字を1枚の画像として描く関数
-      function updateARDisplay(text, emoji) {
-        const canvas = document.getElementById('arCanvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // 背景（少し透ける黒にすると文字が見やすくなります。不要なら消せます）
-        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-        ctx.roundRect(10, 10, 492, 236, 20);
-        ctx.fill();
-
-        // 文字の設定（スマホの標準フォントを使用）
-        ctx.fillStyle = "#FFD700"; // 金色
-        ctx.font = "bold 80px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(text, canvas.width / 2, 120);
-
-        // 絵文字の設定
-        ctx.font = "90px serif";
-        ctx.fillText(emoji, canvas.width / 2, 210);
+      // 文字を描くための手順
+      function drawText(word) {
+        const cvs = document.getElementById('textCanvas');
+        const ctx = cvs.getContext('2d');
         
-        // AR側に「描き直したよ」と通知
-        const plane = document.querySelector('#result-plane');
-        if(plane.getObject3D('mesh')) {
-          plane.getObject3D('mesh').material.map.needsUpdate = true;
+        // 画用紙を真っ白に塗ってから、文字を書く
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; // 半透明の白背景
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+        
+        ctx.fillStyle = "#FF0000"; // 文字色は赤
+        ctx.font = "bold 60px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(word, cvs.width / 2, cvs.height / 2);
+        
+        // 看板に「絵を更新したよ」と伝える
+        const board = document.querySelector('#msg-board');
+        if(board.getObject3D('mesh')) {
+          board.getObject3D('mesh').material.map.needsUpdate = true;
         }
       }
 
-      // 最初はこれを出しておく
-      window.onload = () => { 
-        setTimeout(() => { updateARDisplay("タップしておみくじ", "🐎"); }, 1000);
+      // 起動した時にまず表示
+      window.onload = () => {
+        setTimeout(() => { drawText("タップしてね"); }, 1000);
       };
 
-      // タップイベント
+      // タップされた時
       window.addEventListener('touchstart', function () {
-        const results = [
-          {txt: "大吉", emo: "🌅"},
-          {txt: "中吉", emo: "🎍"},
-          {txt: "小吉", emo: "🥕"},
-          {txt: "あけおめ", emo: "🧧"}
-        ];
-        const res = results[Math.floor(Math.random() * results.length)];
-        updateARDisplay(res.txt, res.emo);
+        const list = ["大吉", "中吉", "小吉", "あけおめ"];
+        const picked = list[Math.floor(Math.random() * list.length)];
+        drawText(picked);
       });
     </script>
   </body>
