@@ -1,13 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-      <a-box position="0 0.5 0" material="color: red;" animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
-      <a-marker-camera preset="hiro"></a-marker-camera>
+    <a-scene embedded arjs cursor="rayOrigin: mouse">
+      <a-assets>
+        <a-asset-item id="horse" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Horse/glTF-Binary/Horse.glb"></a-asset-item>
+      </a-assets>
+
+      <a-marker preset="hiro">
+        <a-entity gltf-model="#horse" scale="0.01 0.01 0.01" position="0 0 0" animation-mixer></a-entity>
+        
+        <a-text id="omikuji-text" value="" position="0 1.5 0" align="center" color="#FFD700" scale="1.5 1.5 1.5"></a-text>
+      </a-marker>
+
+      <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+      // 画面をタップした時におみくじを引くJavaScript
+      document.body.addEventListener('click', function () {
+        const results = ["大吉 🐎", "中吉 🥕", "小吉 ☁️", "吉 ✨"];
+        const randomResult = results[Math.floor(Math.random() * results.length)];
+        
+        // テキストを書き換える
+        const textElement = document.querySelector('#omikuji-text');
+        textElement.setAttribute('value', randomResult);
+        
+        // 音の代わりにアラートを出してみる（テスト用）
+        alert("おみくじの結果は... " + randomResult);
+      });
+    </script>
   </body>
 </html>
