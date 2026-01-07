@@ -7,32 +7,37 @@
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs cursor="rayOrigin: mouse">
+    <script>
+      window.addEventListener('error', function(e) {
+        alert("エラーが発生しました: " + e.message);
+      });
+    </script>
+
+    <a-scene embedded arjs="debugUIEnabled: false;">
       <a-assets>
-        <a-asset-item id="horse" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Horse/glTF-Binary/Horse.glb"></a-asset-item>
+        <a-asset-item id="horse" src="https://raw.githubusercontent.com/nmarulo/ar-assets/main/horse.glb"></a-asset-item>
       </a-assets>
 
       <a-marker preset="hiro">
-        <a-entity gltf-model="#horse" scale="0.01 0.01 0.01" position="0 0 0" animation-mixer></a-entity>
+        <a-sphere position="0 0 0" radius="0.2" color="blue"></a-sphere>
         
-        <a-text id="omikuji-text" value="" position="0 1.5 0" align="center" color="#FFD700" scale="1.5 1.5 1.5"></a-text>
+        <a-entity gltf-model="#horse" 
+                  scale="0.02 0.02 0.02" 
+                  position="0 0 0" 
+                  animation-mixer>
+        </a-entity>
+        
+        <a-text id="omikuji-text" value="TAP TO START" position="0 1 1" align="center" color="#FFD700"></a-text>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // 画面をタップした時におみくじを引くJavaScript
       document.body.addEventListener('click', function () {
         const results = ["大吉 🐎", "中吉 🥕", "小吉 ☁️", "吉 ✨"];
         const randomResult = results[Math.floor(Math.random() * results.length)];
-        
-        // テキストを書き換える
-        const textElement = document.querySelector('#omikuji-text');
-        textElement.setAttribute('value', randomResult);
-        
-        // 音の代わりにアラートを出してみる（テスト用）
-        alert("おみくじの結果は... " + randomResult);
+        document.querySelector('#omikuji-text').setAttribute('value', randomResult);
       });
     </script>
   </body>
